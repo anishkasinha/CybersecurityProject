@@ -1,14 +1,31 @@
-
 <!DOCTYPE html>
 <html>
-<head>
-  <link rel="stylesheet" href="style.css">
-  <title>Threat Analyzer</title>
-</head>
-<body>
-  <textarea id="message" placeholder="Paste a message..."></textarea><br>
-  <button id="analyze">Analyze</button>
-  <p id="result"></p>
-  <script src="popup.js"></script>
-</body>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <title>Threat Analyzer</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="title">CyberThreat<br />Detector</div>
+
+      <div class="meter">
+        <div class="green"></div>
+        <div class="yellow"></div>
+        <div class="red"></div>
+      </div>
+      <div class="slider-dot" id="threat-indicator"></div>
+
+      <!-- Email content input -->
+      <textarea id="message" placeholder="Paste or type the email here..."></textarea>
+
+      <!-- Analyze button -->
+      <button id="analyze" class="analyze">Analyze Email</button>
+
+      <!-- Description output -->
+      <textarea id="description" readonly placeholder="Threat description will appear here..."></textarea>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
 </html>
+
