@@ -1,0 +1,82 @@
+
+
+# Import necessary tools
+from flask import Flask, request, jsonify
+import joblib
+import pandas as pd
+
+# Load the trained ML model pipeline
+model = joblib.load("nsl_kdd_arff_pipeline.pkl")
+
+# Create Flask app
+app = Flask(__name__)
+
+# Define home route
+@app.route("/")
+def home():
+    return "API is running!"
+
+# Create new API route
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    try:
+	   # Get message from request:
+        data = request.get_json()
+        message = data.get("message", "")
+        if not message:
+            return jsonify({"error": "No message provided"}), 400
+        # Simulate feature input: For now just placeholder dummy fill, since model expects full NSL-KDD input - need to change
+        dummy_input = {
+            'duration': 0,
+            'protocol_type': 'tcp',
+            'service': 'http',
+            'flag': 'SF',
+            'src_bytes': 100,
+            'dst_bytes': 50,
+            'land': 0,
+            'wrong_fragment': 0,
+            'urgent': 0,
+            'hot': 0,
+            'num_failed_logins': 0,
+            'logged_in': 1,
+            'num_compromised': 0,
+            'root_shell': 0,
+            'su_attempted': 0,
+            'num_root': 0,
+            'num_file_creations': 0,
+            'num_shells': 0,
+            'num_access_files': 0,
+            'num_outbound_cmds': 0,
+            'is_host_login': 0,
+            'is_guest_login': 0,
+            'count': 10,
+            'srv_count': 5,
+            'serror_rate': 0.0,
+            'srv_serror_rate': 0.0,
+            'rerror_rate': 0.0,
+            'srv_rerror_rate': 0.0,
+            'same_srv_rate': 0.0,
+            'diff_srv_rate': 0.0,
+            'srv_diff_host_rate': 0.0,
+            'dst_host_count': 50,
+            'dst_host_srv_count': 30,
+            'dst_host_same_srv_rate': 0.0,
+            'dst_host_diff_srv_rate': 0.0,
+            'dst_host_same_src_port_rate': 0.0,
+            'dst_host_srv_diff_host_rate': 0.0,
+            'dst_host_serror_rate': 0.0,
+            'dst_host_srv_serror_rate': 0.0,
+            'dst_host_rerror_rate': 0.0,
+            'dst_host_srv_rerror_rate': 0.0,
+        }
+        # Makes threat prediction 
+        df = pd.DataFrame([dummy_input])
+        pred = model.predict(df)[0]
+	      #Returns prediction
+        return jsonify({"threat": bool(pred)})
+	  #Error catching
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+if __name__ == "__main__":
+    print("Starting Flask app...")
+    app.run(debug=True)
