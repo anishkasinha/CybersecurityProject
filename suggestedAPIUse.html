@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Intrusion Detection System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .input-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .prediction-result {
+            display: none;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.5s ease;
+        }
+
+        .prediction-result.normal {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .prediction-result.attack {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .confidence-fill.normal {
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        .confidence-fill.attack {
+            background: linear-gradient(90deg, #dc3545, #e74c3c);
+        }
+
+        .feature-importance {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .importance-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .importance-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .importance-value {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .quick-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .example-btn {
+            background: #e9ecef;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .status.info {
+            background: rgba(52, 152, 219, 0.1);
+            color: #2980b9;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .processing {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Network Intrusion Detection System</h1>
+            <p>Enter network traffic data to detect potential security threats</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Quick Examples -->
+            <div class="section">
+                <h2><span class="icon">⚡</span>Quick Examples</h2>
+                <div class="quick-examples">
+                    <div class="example-btn" onclick="loadExample('normal')">
+                        ✅ Normal Traffic
+                    </div>
+                    <div class="example-btn" onclick="loadExample('dos')">
+                        🚨 DoS Attack
+                    </div>
+                    <div class="example-btn" onclick="loadExample('probe')">
+                        🔍 Probe Attack
+                    </div>
+                    <div class="example-btn" onclick="loadExample('random')">
+                        🎲 Random Values
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Traffic Input -->
+            <div class="section">
+                <h2><span class="icon">📊</span>Network Traffic Data</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="dur">Duration (seconds)</label>
+                        <input type="number" id="dur" step="0.001" value="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="proto">Protocol</label>
+                        <select id="proto">
+                            <option value="tcp">TCP</option>
+                            <option value="udp">UDP</option>
+                            <option value="icmp">ICMP</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="service">Service</label>
+                        <select id="service">
+                            <option value="http">HTTP</option>
+                            <option value="ftp">FTP</option>
+                            <option value="smtp">SMTP</option>
+                            <option value="ssh">SSH</option>
+                            <option value="dns">DNS</option>
+                            <option value="-">None</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="state">Connection State</label>
+                        <select id="state">
+                            <option value="FIN">FIN</option>
+                            <option value="CON">CON</option>
+                            <option value="REQ">REQ</option>
+                            <option value="RST">RST</option>
+                            <option value="INT">INT</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="spkts">Source Packets</label>
+                        <input type="number" id="spkts" value="10">
+                    </div>
+                    <div class="input-group">
+                        <label for="dpkts">Destination Packets</label>
+                        <input type="number" id="dpkts" value="8">
+                    </div>
+                    <div class="input-group">
+                        <label for="sbytes">Source Bytes</label>
+                        <input type="number" id="sbytes" value="1500">
+                    </div>
+                    <div class="input-group">
+                        <label for="dbytes">Destination Bytes</label>
+                        <input type="number" id="dbytes" value="1200">
+                    </div>
+                    <div class="input-group">
+                        <label for="rate">Packet Rate</label>
+                        <input type="number" id="rate" step="0.01" value="100">
+                    </div>
+                    <div class="input-group">
+                        <label for="sttl">Source TTL</label>
+                        <input type="number" id="sttl" value="64">
+                    </div>
+                    <div class="input-group">
+                        <label for="dttl">Destination TTL</label>
+                        <input type="number" id="dttl" value="64">
+                    </div>
+                    <div class="input-group">
+                        <label for="sload">Source Load</label>
+                        <input type="number" id="sload" step="0.01" value="150.5">
+                    </div>
+                    <div class="input-group">
+                        <label for="dload">Destination Load</label>
+                        <input type="number" id="dload" step="0.01" value="120.3">
+                    </div>
+                    <div class="input-group">
+                        <label for="sloss">Source Loss</label>
+                        <input type="number" id="sloss" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="dloss">Destination Loss</label>
+                        <input type="number" id="dloss" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="sinpkt">Source Inter-packet Time</label>
+                        <input type="number" id="sinpkt" step="0.001" value="0.01">
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="predictThreat()">🔍 Analyze Traffic</button>
+                    <button class="btn secondary" onclick="clearForm()">🗑️ Clear All</button>
+                </div>
+            </div>
+
+            <!-- Prediction Results -->
+            <div class="prediction-result" id="predictionResult">
+                <div id="resultText"></div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill"></div>
+                </div>
+                <div id="confidenceText"></div>
+            </div>
+
+            <!-- Feature Analysis -->
+            <div class="section" id="analysisSection" style="display: none;">
+                <h2><span class="icon">🧠</span>Analysis Details</h2>
+                <div class="feature-importance" id="featureImportance"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simplified ML model logic - this mimics your trained Random Forest
+        class NetworkIntrusionDetector {
+            constructor() {
+                // Simplified decision tree rules based on common attack patterns
+                this.rules = [
+                    // DoS attack patterns
+                    { condition: (data) => data.rate > 1000 || data.spkts > 1000, 
+                      prediction: 1, confidence: 0.85, type: 'DoS' },
+                    
+                    // Probe attack patterns  
+                    { condition: (data) => data.dttl < 30 && data.service === 'ssh',
+                      prediction: 1, confidence: 0.78, type: 'Probe' },
+                    
+                    // Suspicious packet patterns
+                    { condition: (data) => data.dloss > 10 || data.sloss > 10,
+                      prediction: 1, confidence: 0.72, type: 'Network Anomaly' },
+                    
+                    // High byte transfer with low packets (potential data exfiltration)
+                    { condition: (data) => (data.sbytes > 10000 && data.spkts < 5) || 
+                                          (data.dbytes > 10000 && data.dpkts < 5),
+                      prediction: 1, confidence: 0.68, type: 'Data Anomaly' },
+                    
+                    // Abnormal inter-packet timing
+                    { condition: (data) => data.sinpkt > 1.0 && data.proto === 'tcp',
+                      prediction: 1, confidence: 0.65, type: 'Timing Attack' },
+                ];
+                
+                // Feature importance (mock values based on typical network security)
+                this.featureImportance = {
+                    'rate': 0.18,
+                    'sbytes': 0.15,
+                    'dbytes': 0.13,
+                    'spkts': 0.12,
+                    'dpkts': 0.11,
+                    'dur': 0.09,
+                    'sload': 0.08,
+                    'dload': 0.07,
+                    'proto': 0.04,
+                    'service': 0.03
+                };
+            }
+
+            predict(inputData) {
+                // Convert categorical variables to numerical
+                const processedData = this.preprocessData(inputData);
+                
+                // Apply rules
+                for (let rule of this.rules) {
+                    if (rule.condition(processedData)) {
+                        return {
+                            prediction: rule.prediction,
+                            confidence: rule.confidence + (Math.random() * 0.1 - 0.05), // Add slight randomness
+                            attackType: rule.type,
+                            features: this.getImportantFeatures(processedData)
+                        };
+                    }
+                }
+                
+                // If no attack patterns detected, classify as normal
+                const baseConfidence = 0.80 + (Math.random() * 0.15); // 80-95% confidence
+                return {
+                    prediction: 0,
+                    confidence: baseConfidence,
+                    attackType: 'Normal Traffic',
+                    features: this.getImportantFeatures(processedData)
+                };
+            }
+
+            preprocessData(data) {
+                // Convert categorical to numerical (simplified encoding)
+                const protoMap = { 'tcp': 1, 'udp': 2, 'icmp': 3 };
+                const serviceMap = { 'http': 1, 'ftp': 2, 'smtp': 3, 'ssh': 4, 'dns': 5, '-': 0 };
+                const stateMap = { 'FIN': 1, 'CON': 2, 'REQ': 3, 'RST': 4, 'INT': 5 };
+
+                return {
+                    ...data,
+                    proto: protoMap[data.proto] || 0,
+                    service: serviceMap[data.service] || 0,
+                    state: stateMap[data.state] || 0
+                };
+            }
+
+            getImportantFeatures(data) {
+                // Return top features with their values
+                return Object.entries(this.featureImportance)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 6)
+                    .map(([feature, importance]) => ({
+                        name: feature,
+                        value: data[feature] || 0,
+                        importance: importance
+                    }));
+            }
+        }
+
+        // Initialize the detector
+        const detector = new NetworkIntrusionDetector();
+
+        function collectInputData() {
+            return {
+                dur: parseFloat(document.getElementById('dur').value) || 0,
+                proto: document.getElementById('proto').value,
+                service: document.getElementById('service').value,
+                state: document.getElementById('state').value,
+                spkts: parseInt(document.getElementById('spkts').value) || 0,
+                dpkts: parseInt(document.getElementById('dpkts').value) || 0,
+                sbytes: parseInt(document.getElementById('sbytes').value) || 0,
+                dbytes: parseInt(document.getElementById('dbytes').value) || 0,
+                rate: parseFloat(document.getElementById('rate').value) || 0,
+                sttl: parseInt(document.getElementById('sttl').value) || 0,
+                dttl: parseInt(document.getElementById('dttl').value) || 0,
+                sload: parseFloat(document.getElementById('sload').value) || 0,
+                dload: parseFloat(document.getElementById('dload').value) || 0,
+                sloss: parseInt(document.getElementById('sloss').value) || 0,
+                dloss: parseInt(document.getElementById('dloss').value) || 0,
+                sinpkt: parseFloat(document.getElementById('sinpkt').value) || 0
+            };
+        }
+
+        function predictThreat() {
+            const inputData = collectInputData();
+            const resultDiv = document.getElementById('predictionResult');
+            
+            // Add processing animation
+            resultDiv.style.display = 'block';
+            resultDiv.classList.add('processing');
+            resultDiv.innerHTML = '<div style="text-align: center;">🔄 Analyzing network traffic...</div>';
+            
+            setTimeout(() => {
+                const result = detector.predict(inputData);
+                displayPrediction(result);
+                resultDiv.classList.remove('processing');
+            }, 1500);
+        }
+
+        function displayPrediction(result) {
+            const resultDiv = document.getElementById('predictionResult');
+            const resultText = document.getElementById('resultText');
+            const confidenceFill = document.getElementById('confidenceFill');
+            const confidenceText = document.getElementById('confidenceText');
+            
+            const isAttack = result.prediction === 1;
+            const confidencePercent = (result.confidence * 100).toFixed(1);
+            
+            // Update result styling and text
+            resultDiv.className = `prediction-result ${isAttack ? 'attack' : 'normal'}`;
+            resultText.innerHTML = isAttack ? 
+                `🚨 THREAT DETECTED<br><small>${result.attackType}</small>` :
+                `✅ TRAFFIC NORMAL<br><small>No threats detected</small>`;
+            
+            // Update confidence bar
+            confidenceFill.className = `confidence-fill ${isAttack ? 'attack' : 'normal'}`;
+            confidenceFill.style.width = `${result.confidence * 100}%`;
+            confidenceText.textContent = `Confidence: ${confidencePercent}%`;
+            
+            // Show feature analysis
+            displayFeatureAnalysis(result.features);
+        }
+
+        function displayFeatureAnalysis(features) {
+            const analysisSection = document.getElementById('analysisSection');
+            const featureImportance = document.getElementById('featureImportance');
+            
+            featureImportance.innerHTML = '';
+            features.forEach(feature => {
+                const item = document.createElement('div');
+                item.className = 'importance-item';
+                item.innerHTML = `
+                    <div class="importance-name">${feature.name.toUpperCase()}</div>
+                    <div class="importance-value">Value: ${feature.value} | Importance: ${(feature.importance * 100).toFixed(1)}%</div>
+                `;
+                featureImportance.appendChild(item);
+            });
+            
+            analysisSection.style.display = 'block';
+        }
+
+        function loadExample(type) {
+            const examples = {
+                normal: {
+                    dur: 0.1, proto: 'tcp', service: 'http', state: 'FIN',
+                    spkts: 10, dpkts: 8, sbytes: 1500, dbytes: 1200,
+                    rate: 100, sttl: 64, dttl: 64, sload: 150.5,
+                    dload: 120.3, sloss: 0, dloss: 0, sinpkt: 0.01
+                },
+                dos: {
+                    dur: 0.001, proto: 'tcp', service: 'http', state: 'RST',
+                    spkts: 2000, dpkts: 0, sbytes: 500000, dbytes: 0,
+                    rate: 5000, sttl: 64, dttl: 0, sload: 8000,
+                    dload: 0, sloss: 0, dloss: 100, sinpkt: 0.001
+                },
+                probe: {
+                    dur: 0.5, proto: 'tcp', service: 'ssh', state: 'REQ',
+                    spkts: 3, dpkts: 1, sbytes: 200, dbytes: 50,
+                    rate: 6, sttl: 64, dttl: 20, sload: 400,
+                    dload: 100, sloss: 0, dloss: 0, sinpkt: 0.2
+                },
+                random: {
+                    dur: Math.random() * 10, proto: ['tcp', 'udp', 'icmp'][Math.floor(Math.random() * 3)],
+                    service: ['http', 'ftp', 'smtp', 'ssh', 'dns'][Math.floor(Math.random() * 5)],
+                    state: ['FIN', 'CON', 'REQ', 'RST', 'INT'][Math.floor(Math.random() * 5)],
+                    spkts: Math.floor(Math.random() * 1000), dpkts: Math.floor(Math.random() * 1000),
+                    sbytes: Math.floor(Math.random() * 50000), dbytes: Math.floor(Math.random() * 50000),
+                    rate: Math.random() * 2000, sttl: Math.floor(Math.random() * 255),
+                    dttl: Math.floor(Math.random() * 255), sload: Math.random() * 1000,
+                    dload: Math.random() * 1000, sloss: Math.floor(Math.random() * 50),
+                    dloss: Math.floor(Math.random() * 50), sinpkt: Math.random()
+                }
+            };
+
+            const example = examples[type];
+            Object.keys(example).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = example[key];
+                }
+            });
+        }
+
+        function clearForm() {
+            document.querySelectorAll('input, select').forEach(element => {
+                if (element.type === 'number') {
+                    element.value = 0;
+                } else {
+                    element.selectedIndex = 0;
+                }
+            });
+            
+            document.getElementById('predictionResult').style.display = 'none';
+            document.getElementById('analysisSection').style.display = 'none';
+        }
+
+        // Initialize with normal traffic example
+        loadExample('normal');
+    </script>
+</body>
+</html>
